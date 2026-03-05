@@ -27,10 +27,11 @@ void _atexit(void *(*handler)())
 void __syscall(long syscall, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
 static int ___get_cmd_info(char *buffer) {
+    long fd = 0;
     #if defined(__x86__) || defined(__x86_64__)
-        long fd = __syscall__((long)"/proc/self/cmdline", 0, 0, -1, -1, -1, _SYS_OPEN);
+        fd = __syscall__((long)"/proc/self/cmdline", 0, 0, -1, -1, -1, _SYS_OPEN);
 	#elif defined(__riscv)
-    	long fd = __syscall__(-100, (long)"/proc/self/cmdline", 0, 0, -1, -1, _SYS_OPENAT);
+    	fd = __syscall__(-100, (long)"/proc/self/cmdline", 0, 0, -1, -1, _SYS_OPENAT);
 	#endif
     if(fd <= 0)
     {
