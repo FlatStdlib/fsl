@@ -27,8 +27,8 @@ string LD_COMPILE_FLAGS[LD_FLAGS] = {
     NULL
 };
 
-const string CLIBP_LIB = "/usr/lib/libfsl.a";
-const string CLIBP_LOADER = "/usr/lib/loader.o";
+const string FSL_LIB = "/usr/lib/libfsl.a";
+const string FSL_LOADER = "/usr/lib/loader.o";
 
 int create_gcc_command(sArr command)
 {
@@ -79,7 +79,7 @@ int entry(int argc, string argv[]) {
 
 	if(argc < 3)
 	{
-		println("[ x ] \x1b[31mError\x1b[39m, Invalid arguments provided\nUsage: gclibp <c_file> <opt> <output>\nUse --help for help or more arguments");
+		println("[ x ] \x1b[31mError\x1b[39m, Invalid arguments provided\nUsage: fsl <c_file> <opt> <output>\nUse --help for help or more arguments");
 		return 1;
 	}
 
@@ -131,8 +131,8 @@ int entry(int argc, string argv[]) {
 			ld_cmd[ld_pos++] = str_dup(argv[i]);
 		}
 
-		ld_cmd[ld_pos++] = str_dup(CLIBP_LIB);
-		ld_cmd[ld_pos++] = str_dup(CLIBP_LOADER);
+		ld_cmd[ld_pos++] = str_dup(FSL_LIB);
+		ld_cmd[ld_pos++] = str_dup(FSL_LOADER);
 		ld_cmd[ld_pos] = NULL;
 
 		/*
@@ -148,7 +148,7 @@ int entry(int argc, string argv[]) {
 		if(array_contains_str((array)argv, "-c") > -1)
 			return 0;
 
-		__sprintf(BUFFER, "[ + ] Linking with /usr/lib/libclibp.a and Producing '%s'....", output_file);
+		__sprintf(BUFFER, "[ + ] Linking with /usr/lib/libfsl.a and Producing '%s'....", output_file);
 		println(BUFFER);
 		__execute(ld_cmd[0], ld_cmd);
 

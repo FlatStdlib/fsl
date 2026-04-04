@@ -112,6 +112,7 @@ void _start() {
 
     if(on_exit)
     	on_exit();
+        
     uninit_mem();
     __syscall(60, code, -1, -1, -1, -1, -1);
 }
