@@ -145,7 +145,7 @@ int entry(int argc, string argv[]) {
 		// print("\n");
 
 		/* Create binary with object files */
-		if(array_contains_str((array)argv, "-c") > -1)
+		if(array_contains_str((array)argv, "-c"))
 			return 0;
 
 		__sprintf(BUFFER, "[ + ] Linking with /usr/lib/libfsl.a and Producing '%s'....", output_file);
