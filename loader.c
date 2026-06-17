@@ -25,6 +25,7 @@ void _atexit(void *(*handler)())
 
 /* Declare Function from build/syscall.o */
 void __syscall(long syscall, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
+long __syscall__(long arg1, long arg2, long arg3, long arg4, long arg5, long arg6, long syscall);
 
 static int ___get_cmd_info(char *buffer) {
     long fd = 0;
@@ -100,8 +101,14 @@ void _start() {
 	set_heap_sz(4096 * 2);
 	init_mem();
 
+    if(!__is_heap_init__())
+        __syscall__(1, -1, -1, -1, -1, -1, _SYS_EXIT);
+
     char OUTPUT[1024];
     sArr arr = allocate(sizeof(char *), __ARGC__);
+    if(!arr)
+        __syscall__(1, -1, -1, -1, -1, -1, _SYS_EXIT);
+        
     for(int i = 0; i < __ARGC__; i++)
     {
         arr[i] = str_dup(__ARGV__[i]);
@@ -114,5 +121,5 @@ void _start() {
     	on_exit();
         
     uninit_mem();
-    __syscall(60, code, -1, -1, -1, -1, -1);
+    __syscall__(code, -1, -1, -1, -1, -1, _SYS_EXIT);
 }
