@@ -85,7 +85,7 @@ int entry(int argc, string argv[]) {
 
 	int idx;
 	char BUFFER[1024];
-	if((idx = array_contains_str((array)argv, "--output")) > -1) {
+	if((idx = array_contains_str((array)argv, "--o")) > -1) {
 		string output_file = argv[idx + 1];
 
 		sArr gcc_cmd = allocate(sizeof(char *), argc + 3);
