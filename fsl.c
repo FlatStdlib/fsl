@@ -57,21 +57,21 @@ const string FILES[] = {
     NULL
 };
 
-static void __execute(char *app, char **args)
-{
-	if(!app || !args)
-		return;
-
-	long pid = __syscall__(0, 0, 0, -1, -1, -1, _SYS_FORK);
-
-	if(pid == 0)
-	{
-		__syscall__((long)app, (long)args, 0, -1, -1, -1, _SYS_EXECVE);
-	} else if(pid > 0) {
-		__syscall__(pid, 0, 0, -1, -1, -1, _SYS_WAIT4);
-	} else {
-		__syscall__(1, (long)"fork error\n", 7, -1, -1, -1, _SYS_WRITE);
-	}
+static void __execute(char *app, char **args) 
+{ 
+	if(!app || !args) 
+		return; 
+ 
+	long pid = __syscall__(0, 0, 0, -1, -1, -1, _SYS_FORK); 
+ 
+	if(pid == 0) 
+	{ 
+		__syscall__((long)app, (long)args, 0, -1, -1, -1, _SYS_EXECVE); 
+	} else if(pid > 0) { 
+		long ret = __syscall__(pid, 0, 0, -1, -1, -1, _SYS_WAIT4);
+	} else { 
+		__syscall__(1, (long)"fork error\n", 7, -1, -1, -1, _SYS_WRITE); 
+	} 
 }
 
 bool validate_c_file(string q, int sz)
@@ -92,9 +92,19 @@ public int entry(int argc, string argv[])
         DEBUG = 1;
 
     memzero(BUILD_COMMAND, 2048);
-    
-    /* Add Default Command */
-    str_join(BUILD_COMMAND, (array)COMPILER_FLAGS, ' ');
+
+	int pos = 0;
+	if((pos = array_contains_str((array)argv, "--cc")) == -1)
+	{
+	    /* Add Default Command */
+    	str_join(BUILD_COMMAND, (array)COMPILER_FLAGS, ' ');
+	} else {
+		pos++;
+        int len = __get_size__(argv[pos]) - 1;
+		mem_cpy(BUILD_COMMAND, argv[pos], len);
+        BUILD_COMMAND[len] = ' ';
+		str_join(BUILD_COMMAND, (array)COMPILER_FLAGS + 1, ' ');
+	}
 
     string executable[50];
     memzero(executable, 50);
@@ -116,7 +126,7 @@ public int entry(int argc, string argv[])
             _c_files++;
         }
 
-        if(str_cmp(argv[i], "-o"))
+        if(str_cmp(argv[i], "-o") || str_cmp(argv[i], "--o"))
             exec = i + 1, output_pos = i + 1;
 
         if(str_cmp(argv[i], "--cflags"))
@@ -160,7 +170,7 @@ public int entry(int argc, string argv[])
     }
 
     /* Exit Upon Object File Flag Request '-c' */
-    if(array_contains_str((array)argv, "-c") > -1)
+    if(array_contains_str((array)argv, "-c") > -1 || array_contains_str((array)argv, "--cc") > -1)
     {
         println("[ + ] Object File Created");
         return 0;
@@ -172,12 +182,32 @@ public int entry(int argc, string argv[])
 
     str_join(LINK_COMMAND, (array)LD_LINKER_FLAGS, ' ');
 
+    // _printf("Data: %s | arg: %c", argv[output_pos], (ptr)&output_pos);
     str_append(LINK_COMMAND, argv[output_pos]);
     str_append(LINK_COMMAND, " ");
 
     for(int i = 0; i < _c_files; i++) {
-        str_append(LINK_COMMAND, C_FILES[i]);
-        str_append(LINK_COMMAND, " ");
+        if(str_cmp(C_FILES[i], "/usr/lib/libfsl.a") || str_cmp(C_FILES[i], "/usr/lib/loader.o"))
+            break;
+
+        if(str_endswith(C_FILES[i], ".o")) {
+            if(find_char(C_FILES[i], '/') > -1) {
+                int arg_c = 0;
+                sArr arr = split_string(C_FILES[i], '/', &arg_c);
+                if(arr)
+                {
+                    str_append(LINK_COMMAND, arr[arg_c - 1]);
+                    str_append(LINK_COMMAND, " ");
+                    pfree_array((array)arr);
+                    continue;
+                }
+                str_append(LINK_COMMAND, C_FILES[i]);
+                str_append(LINK_COMMAND, " ");
+            } else {
+                str_append(LINK_COMMAND, C_FILES[i]);
+                str_append(LINK_COMMAND, " ");
+            }
+        }
     }
 
     str_append(LINK_COMMAND, "/usr/lib/libfsl.a ");
@@ -194,6 +224,9 @@ public int entry(int argc, string argv[])
     for(int i = 0; i < cmd_argc; i++)
     {
         if(!ld_args[i]) break;
+        if(str_cmp(ld_args[i], "/usr/lib/libfsl.a") || str_cmp(ld_args[i], "/usr/lib/loader.o"))
+            break;
+
         if(DEBUG) {
             _printf("[%d]: %s\r\n", (ptr)&i, ld_args[i]);
         }
