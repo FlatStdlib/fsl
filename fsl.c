@@ -1,6 +1,8 @@
 /* 
     fsl-gcc chain compiler v1.5 (Production Rewrite)
 
+    Supporting specifically x86 && x86_64 linux ubuntu
+
     Original repo; https://github.com/FlatStdlib/fsl
 */
 #include <fsl.h>
@@ -23,7 +25,6 @@ const string COMPILER_FLAGS[] = {
     "/usr/bin/gcc",
     "-ffunction-sections",
     "-fdata-sections",
-    "-Wl,--gc-sections",
     "-nostdlib",
     "-ffreestanding",
     "-c",
@@ -103,7 +104,7 @@ public int entry(int argc, string argv[])
         int len = __get_size__(argv[pos]) - 1;
 		mem_cpy(BUILD_COMMAND, argv[pos], len);
         BUILD_COMMAND[len] = ' ';
-		str_join(BUILD_COMMAND, (array)COMPILER_FLAGS + 1, ' ');
+		str_join(BUILD_COMMAND + 1, (array)COMPILER_FLAGS + 1, ' ');
 	}
 
     string executable[50];
@@ -126,7 +127,7 @@ public int entry(int argc, string argv[])
             _c_files++;
         }
 
-        if(str_cmp(argv[i], "-o") || str_cmp(argv[i], "--o"))
+        if(str_cmp(argv[i], "-o"))
             exec = i + 1, output_pos = i + 1;
 
         if(str_cmp(argv[i], "--cflags"))
@@ -149,18 +150,12 @@ public int entry(int argc, string argv[])
     /* Compilation Arguments */
     int cmd_argc = 0;
     sArr cmd_args = split_string(BUILD_COMMAND, ' ', &cmd_argc);
-
-    if(array_contains_str((array)argv, "-c") > -1)
-    {
-        println("[ + ] Compiling to object file(s)....");
-        __execute(cmd_args[0], cmd_args);
-        return 0;
-    }
     
     __execute(cmd_args[0], cmd_args);
 
     /* Debug GCC Command */
     if(DEBUG) {
+        println("Raw Cmd: "), println(BUILD_COMMAND);
         _printf("\x1b[32mGCC:\x1b[0m '%s'\n", BUILD_COMMAND);
         for(int i = 0; i < cmd_argc; i++)
         {
@@ -170,7 +165,7 @@ public int entry(int argc, string argv[])
     }
 
     /* Exit Upon Object File Flag Request '-c' */
-    if(array_contains_str((array)argv, "-c") > -1 || array_contains_str((array)argv, "--cc") > -1)
+    if(array_contains_str((array)argv, "-obj") > -1)
     {
         println("[ + ] Object File Created");
         return 0;
@@ -182,7 +177,6 @@ public int entry(int argc, string argv[])
 
     str_join(LINK_COMMAND, (array)LD_LINKER_FLAGS, ' ');
 
-    // _printf("Data: %s | arg: %c", argv[output_pos], (ptr)&output_pos);
     str_append(LINK_COMMAND, argv[output_pos]);
     str_append(LINK_COMMAND, " ");
 
@@ -192,16 +186,11 @@ public int entry(int argc, string argv[])
 
         if(str_endswith(C_FILES[i], ".o")) {
             if(find_char(C_FILES[i], '/') > -1) {
-                int arg_c = 0;
-                sArr arr = split_string(C_FILES[i], '/', &arg_c);
-                if(arr)
-                {
-                    str_append(LINK_COMMAND, arr[arg_c - 1]);
-                    str_append(LINK_COMMAND, " ");
-                    pfree_array((array)arr);
-                    continue;
-                }
-                str_append(LINK_COMMAND, C_FILES[i]);
+                int cnt = count_char(C_FILES[i], '/');
+                int pos = 0, match = 0;
+			    while((pos = find_char_at(C_FILES[i], '/', pos + 1)) != -1) match = pos;
+                
+                str_append(LINK_COMMAND, C_FILES[i] + match);
                 str_append(LINK_COMMAND, " ");
             } else {
                 str_append(LINK_COMMAND, C_FILES[i]);
