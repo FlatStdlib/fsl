@@ -114,7 +114,8 @@ void _start() {
         arr[i] = str_dup(__ARGV__[i]);
         arr[i + 1] = NULL;
     }
-
+    
+    _enable_sig_handler(NULL);
     int code = entry(__ARGC__, arr);
 
     if(on_exit)
