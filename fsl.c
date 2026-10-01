@@ -202,7 +202,7 @@ public int entry(int argc, string argv[])
     str_append(LINK_COMMAND, "/usr/lib/loader.o");
     if((ld_flags = array_contains_str((array)argv, "--ldflags")) > -1)
     {
-        str_append(LINK_COMMAND, argv[ld_flags + 1]);
+        str_append_array(LINK_COMMAND, (const string []){" ", argv[ld_flags + 1], NULL});
     }
 
     sArr ld_args = split_string(LINK_COMMAND, ' ', &cmd_argc);
@@ -216,12 +216,13 @@ public int entry(int argc, string argv[])
     for(int i = 0; i < cmd_argc; i++)
     {
         if(!ld_args[i]) break;
-        if(str_cmp(ld_args[i], "/usr/lib/libfsl.a") || str_cmp(ld_args[i], "/usr/lib/loader.o"))
-            break;
 
         if(DEBUG) {
             _printf("[%d]: %s\r\n", (ptr)&i, ld_args[i]);
         }
+        
+        if(str_cmp(ld_args[i], "/usr/lib/libfsl.a") || str_cmp(ld_args[i], "/usr/lib/loader.o"))
+            continue;
 
         if(str_endswith(ld_args[i], ".o"))
             rm[len++] = str_dup(ld_args[i]);
