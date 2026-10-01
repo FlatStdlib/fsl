@@ -115,7 +115,7 @@ public int entry(int argc, string argv[])
 
     /* Iterate Command Arguments */
     int output_pos = 0;
-    int cflags = 0, exec = 0;
+    int cflags = 0, ld_flags = 0, exec = 0;
     for(int i = 0; i < argc; i++)
     {
         int sz = str_len(argv[i]);
@@ -150,7 +150,6 @@ public int entry(int argc, string argv[])
     /* Compilation Arguments */
     int cmd_argc = 0;
     sArr cmd_args = split_string(BUILD_COMMAND, ' ', &cmd_argc);
-    
     __execute(cmd_args[0], cmd_args);
 
     /* Debug GCC Command */
@@ -201,6 +200,10 @@ public int entry(int argc, string argv[])
 
     str_append(LINK_COMMAND, "/usr/lib/libfsl.a ");
     str_append(LINK_COMMAND, "/usr/lib/loader.o");
+    if((ld_flags = array_contains_str((array)argv, "--ldflags")) > -1)
+    {
+        str_append(LINK_COMMAND, argv[ld_flags + 1]);
+    }
 
     sArr ld_args = split_string(LINK_COMMAND, ' ', &cmd_argc);
     __execute(ld_args[0], ld_args);
