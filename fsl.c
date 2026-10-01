@@ -31,10 +31,11 @@ const string COMPILER_FLAGS[] = {
     NULL
 };
 
-#define LD_FLAGS 4
+#define LD_FLAGS 5
 string LD_LINKER_FLAGS[LD_FLAGS] = {
     "/usr/bin/ld",
 	"--no-relax",
+    "--gc-sections",
     "-o",
     NULL
 };
@@ -202,7 +203,7 @@ public int entry(int argc, string argv[])
     str_append(LINK_COMMAND, "/usr/lib/loader.o");
     if((ld_flags = array_contains_str((array)argv, "--ldflags")) > -1)
     {
-        str_append_array(LINK_COMMAND, (const string []){" ", argv[ld_flags + 1], NULL});
+        str_append_array(LINK_COMMAND, (string []){" ", argv[ld_flags + 1], NULL});
     }
 
     sArr ld_args = split_string(LINK_COMMAND, ' ', &cmd_argc);
