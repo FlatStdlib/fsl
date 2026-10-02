@@ -186,12 +186,15 @@ public int entry(int argc, string argv[])
 
         if(str_endswith(C_FILES[i], ".o")) {
             if(find_char(C_FILES[i], '/') > -1) {
-                int cnt = count_char(C_FILES[i], '/');
-                int pos = 0, match = 0;
-			    while((pos = find_char_at(C_FILES[i], '/', pos + 1)) != -1) match = pos;
-                
-                str_append(LINK_COMMAND, C_FILES[i] + match);
+                int arg_c = 0;
+                sArr r = split_string(C_FILES[i], '/', &arg_c);
+                if(!r)
+                    continue;
+
+                str_append(LINK_COMMAND, r[arg_c - 1]);
                 str_append(LINK_COMMAND, " ");
+
+                pfree_array((array)r);
             } else {
                 str_append(LINK_COMMAND, C_FILES[i]);
                 str_append(LINK_COMMAND, " ");
@@ -199,8 +202,8 @@ public int entry(int argc, string argv[])
         }
     }
 
-    str_append(LINK_COMMAND, "/usr/lib/libfsl.a ");
-    str_append(LINK_COMMAND, "/usr/lib/loader.o");
+    str_append(LINK_COMMAND, "/usr/lib/loader.o ");
+    str_append(LINK_COMMAND, "/usr/lib/libfsl.a");
     if((ld_flags = array_contains_str((array)argv, "--ldflags")) > -1)
     {
         str_append_array(LINK_COMMAND, (string []){" ", argv[ld_flags + 1], NULL});
