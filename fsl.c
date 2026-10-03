@@ -31,6 +31,9 @@ const string COMPILER_FLAGS[] = {
     NULL
 };
 
+/*
+-fno-builtin -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -fno-ident -fno-plt -fno-pie
+*/
 #define LD_FLAGS 5
 string LD_LINKER_FLAGS[LD_FLAGS] = {
     "/usr/bin/ld",
