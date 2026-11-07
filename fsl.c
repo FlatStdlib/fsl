@@ -27,6 +27,11 @@ const string COMPILER_FLAGS[] = {
     "-fdata-sections",
     "-nostdlib",
     "-ffreestanding",
+    "-fno-ident",
+    "-fno-unwind-tables",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-stack-protector",
+    "-fno-builtin",
     "-c",
     NULL
 };
@@ -34,10 +39,11 @@ const string COMPILER_FLAGS[] = {
 /*
 -fno-builtin -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-stack-protector -fno-ident -fno-plt -fno-pie
 */
-#define LD_FLAGS 5
+#define LD_FLAGS 6
 string LD_LINKER_FLAGS[LD_FLAGS] = {
     "/usr/bin/ld",
 	"--no-relax",
+    "--build-id=none",
     "--gc-sections",
     "-o",
     NULL
